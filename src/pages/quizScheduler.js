@@ -57,8 +57,8 @@ async function quizScheduler(bot) {
   // Schedule sending questions every minute (you can change this interval)
   let questionIndex = 0;
   if (isValid()) {
-    cron.schedule("*/1 * * * *", () => {
-      // Every minute
+    cron.schedule("*/20 * * * *", () => {
+      // Every Twenty minute
       sendQuestion(questionIndex);
       questionIndex++;
 

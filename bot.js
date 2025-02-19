@@ -5,14 +5,16 @@ const { processFile } = require('./src/pages/processFile');
 const {quizScheduler, handleScheduledCallbackQuery} = require('./src/pages/quizScheduler');
 const bot = new TelegramBot(TOKEN, { polling: true });
 
-quizScheduler(bot);
-
 bot.onText(/\/start/, (msg) => {
   bot.sendMessage(msg.chat.id, "Welcome to the Quiz Bot! Type /quiz to start.");
 });
 
 bot.onText(/\/quiz/, (msg) => {
   handleQuiz(bot, msg);
+});
+
+bot.onText(/\/question/, (msg) => {
+  quizScheduler(bot);
 });
 
 function handleCallbackQueryType(bot, callbackQuery) {
