@@ -1,0 +1,32 @@
+name: Deploy Telegram Bot
+
+on:
+  push:
+    branches:
+      - main  # Runs when you push to the main branch
+  schedule:
+    - cron: "*/30 * * * *"  # Runs every 30 minutes (optional)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18  # Use the version your bot requires
+
+      - name: Install Dependencies
+        run: npm install  # Adjust if you're using another package manager
+
+      - name: Run Telegram Bot
+        run: node bot.js  # Replace with the entry file of your bot
+
+      - name: Keep Bot Alive
+        run: |
+          while true; do
+            sleep 300  # Keeps the workflow running for 5 minutes
+          done
