@@ -1,7 +1,7 @@
 const { processExcelFile } = require("../../utils/fileUtils");
 const fs = require("fs");
 const filePath = "src/data/quiz.xlsx";
-
+const axios = require("axios");
 let quiz = [];
 if (fs.existsSync(filePath)) {
   quiz = processExcelFile(filePath);
@@ -11,29 +11,65 @@ if (fs.existsSync(filePath)) {
 }
 
 let userProgress = {};
-
-function handleQuiz(bot, msg) {
+async function handleQuiz(bot, msg) {
   const chatId = msg.chat.id;
 
-  userProgress[chatId] = { score: 0, answers: Array(quiz.length).fill(null) };
+  try {
+    // 🧠 Ensure quiz is defined
+    if (!Array.isArray(quiz) || quiz.length === 0) {
+      throw new Error("Quiz data is missing or not initialized");
+    }
 
-  quiz.forEach((q, index) => {
-    // Each option in a separate row (column layout)
-    const options = q.options.map((option, i) => [
-      {
-        text: option,
-        callback_data: `Q_${index}_${i}_set`
-      }
-    ]);
+    const today = new Date().toISOString().split("T")[0];
+    const url = "https://script.google.com/macros/s/AKfycbw_Jc5oM0q3yZctHBc6wkZODD3qHW6RRdcOe6sTRStFM6WhicG7lOVOBSZzEoHQohk/exec";
+    const payload = {
+      title: `fmg-quiz (${today})`,
+      questions: quiz,
+      chatId: chatId.toString()
+    };
 
-    bot.sendMessage(chatId, `❓ *${q.question}*`, {
-      parse_mode: "Markdown",
-      reply_markup: { inline_keyboard: options }
+    console.log("📤 Sending POST to Google Apps Script:", url);
+    console.log("Payload:", JSON.stringify(payload, null, 2));
+
+    const response = await axios.post(url, payload, {
+      headers: { "Content-Type": "application/json" },
+      timeout: 30000  // 30s timeout
     });
-  });
 
+    // 🧪 Ensure response is valid
+    if (!response || !response.data) {
+      throw new Error("No response or malformed response from Google Apps Script");
+    }
 
+    const formUrl = response.data.formUrl;
+    if (!formUrl) {
+      console.error("🔴 Invalid response data:", response.data);
+      throw new Error("formUrl missing in response");
+    }
+
+    // ✅ Success message to Telegram
+    bot.sendMessage(chatId, `📝 Complete the quiz:\n\n[fmg-test](${formUrl})`, {
+      parse_mode: "Markdown"
+    });
+
+  } catch (error) {
+    console.error("❌ Error creating quiz:", error);
+
+    if (error.response) {
+      console.error("🔴 Axios Response Error:", {
+        status: error.response.status,
+        data: error.response.data
+      });
+    } else if (error.request) {
+      console.error("🕳 No response received from Google Apps Script");
+    } else {
+      console.error("🧠 Error:", error.message);
+    }
+
+    bot.sendMessage(chatId, "❌ Failed to create quiz. Please try again later.");
+  }
 }
+
 
 function handleCallbackQuery(bot, callbackQuery) {
   const chatId = callbackQuery.message.chat.id;
@@ -45,7 +81,7 @@ function handleCallbackQuery(bot, callbackQuery) {
   }
 
   const [questionIndex, selectedOptionIndex] = data
-    .slice(1)
+    .slice(2)
     .split("_")
     .map(Number);
 
@@ -57,13 +93,13 @@ function handleCallbackQuery(bot, callbackQuery) {
   // Modify the inline buttons to reflect the updated answer
   const options = quiz[questionIndex].options.map((option, i) => [
     {
-      text: i === selectedOptionIndex ? `✅ ${option}` : option,
-      callback_data: `Q_${index}_${i}_set`
+      text: i === selectedOptionIndex ? `🟡 ${option}` : option,
+      callback_data: `Q_${questionIndex}_${i}_set`
     }
   ]);
 
   bot.editMessageText(
-    `❓ *${quiz[questionIndex].question}*\n\n✅ Your Answer: ${selectedOption}`,
+    `❓ *${quiz[questionIndex].question}*`,
     {
       chat_id: chatId,
       message_id: callbackQuery.message.message_id,
@@ -97,7 +133,7 @@ function showResults(bot, chatId) {
     const userAnswer = user.answers[i] || "No Answer";
     const correct = userAnswer === q.answer;
 
-    resultMessage += `❓ *${q.question}*\nYour Answer: ${userAnswer}\n✅ Correct Answer: ${q.answer}\n\n`;
+    resultMessage += ` *${q.question}*\nYour Answer: ${userAnswer}\n✅ Correct Answer: ${q.answer}\n🟡 Your Answer :${userAnswer} \n\n`;
     if (correct) user.score++;
   });
 

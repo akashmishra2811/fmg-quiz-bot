@@ -84,7 +84,7 @@ function handleScheduledCallbackQuery(bot, callbackQuery) {
     const [,questionIndex, selectedOptionIndex,] = data.split('_').map(Number);
   
     const selectedOption = quiz[questionIndex].options[selectedOptionIndex];
-    const correctAnswer = quiz[questionIndex].answer;
+    const correctAnswer = quiz[questionIndex].correctAnswer;
   
     // Update the user's answer in progress
     userProgress[chatId].answers[questionIndex] = selectedOption;

@@ -26,7 +26,7 @@ const processExcelFile = (filePath) => {
     const formattedData = data.slice(1).map((row) => ({
       question: row[0] || "",
       options: [row[1] || "", row[2] || "", row[3] || "", row[4] || ""].filter(Boolean),
-      answer: row[5] || "",
+      correctAnswer: row[5] || "",
       explain: row[6] || "",
     }));
 
