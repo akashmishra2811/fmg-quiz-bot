@@ -4,8 +4,11 @@ const { TOKEN, superUserList } = require('../../config');
 const { downloadFile, processExcelFile } = require("../../utils/fileUtils")
 async function processFile (bot,msg){
         const chatId = msg.chat.id;
-      
-        // Check if the message contains a document (file upload)
+    
+        if (!superUserList.includes(chatId.toString())) {
+          bot.sendMessage(chatId, "You are not authorized to upload files. Only Admin can upload files.");
+          return;
+        }
         if (msg.document) {
           const fileId = msg.document.file_id;
       
@@ -20,7 +23,7 @@ async function processFile (bot,msg){
             const file = await bot.getFile(fileId);
             const filePath = file.file_path;
             // Define local file path
-            const fileName = document.file_name.split('.')[0]
+            const fileName = msg.document.file_name.split('.')[0];
             let localFilePath = path.join(`${__dirname}/data`, "quiz.xlsx");
             if(fileName=== 'questions'){
               localFilePath =  path.join(`${__dirname}/data`, "questions.xlsx");

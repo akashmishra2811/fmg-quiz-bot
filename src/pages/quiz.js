@@ -48,7 +48,7 @@ async function handleQuiz(bot, msg) {
     }
 
     // ✅ Success message to Telegram
-    bot.sendMessage(chatId, `📝 Complete the quiz:\n\n[fmg-test](${formUrl})`, {
+    bot.sendMessage(chatId, `📝 Complete the test:\n\n[fmg-test](${formUrl})`, {
       parse_mode: "Markdown"
     });
 
