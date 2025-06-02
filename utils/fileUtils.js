@@ -26,8 +26,10 @@ const processExcelFile = (filePath) => {
     const formattedData = data.slice(1).map((row) => ({
       question: row[0] || "",
       options: [row[1] || "", row[2] || "", row[3] || "", row[4] || ""].filter(Boolean),
-      correctAnswer: row[5] || "",
+      correctAnswer: row[7] === 'multiple' ? (row[5] ? row[5].split(',').map(answer => answer.trim()) : []) : (row[5] || ""),
       explain: row[6] || "",
+      type: row[7] === 'multiple'? "multiple" : "single",
+      imageUrl: row[8] || "",
     }));
 
     return formattedData;

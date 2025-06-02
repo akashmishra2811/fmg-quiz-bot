@@ -20,8 +20,11 @@ async function handleQuiz(bot, msg) {
       throw new Error("Quiz data is missing or not initialized");
     }
 
+    // 🕓 Send initial "loading" message
+    const loadingMessage = await bot.sendMessage(chatId, "⏳ Preparing your Test... Please wait.");
+
     const today = new Date().toISOString().split("T")[0];
-    const url = "https://script.google.com/macros/s/AKfycbw_Jc5oM0q3yZctHBc6wkZODD3qHW6RRdcOe6sTRStFM6WhicG7lOVOBSZzEoHQohk/exec";
+    const url = "https://script.google.com/macros/s/AKfycbwjQwM32aR0BDbF502K7CKSKc5Sfn2UfiLOKgEzqsPWs4fLjI9oo-f9HywNgCoFsCMq/exec";
     const payload = {
       title: `fmg-quiz (${today})`,
       questions: quiz,
@@ -33,10 +36,9 @@ async function handleQuiz(bot, msg) {
 
     const response = await axios.post(url, payload, {
       headers: { "Content-Type": "application/json" },
-      timeout: 30000  // 30s timeout
+      timeout: 30000
     });
 
-    // 🧪 Ensure response is valid
     if (!response || !response.data) {
       throw new Error("No response or malformed response from Google Apps Script");
     }
@@ -47,8 +49,10 @@ async function handleQuiz(bot, msg) {
       throw new Error("formUrl missing in response");
     }
 
-    // ✅ Success message to Telegram
-    bot.sendMessage(chatId, `📝 Complete the test:\n\n[fmg-test](${formUrl})`, {
+    // ✅ Edit the loading message with the final quiz link
+    await bot.editMessageText(`🎉 Your daily FMG practice test is ready! Sharpen your skills and test your knowledge by clicking the link below:\n\n👉 [Start Your Test Now](${formUrl})`, {
+      chat_id: chatId,
+      message_id: loadingMessage.message_id,
       parse_mode: "Markdown"
     });
 
@@ -66,9 +70,11 @@ async function handleQuiz(bot, msg) {
       console.error("🧠 Error:", error.message);
     }
 
+    // Update or send fallback error message
     bot.sendMessage(chatId, "❌ Failed to create quiz. Please try again later.");
   }
 }
+
 
 
 function handleCallbackQuery(bot, callbackQuery) {
