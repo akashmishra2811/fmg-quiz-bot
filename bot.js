@@ -23,7 +23,7 @@ bot.onText(/\/start/, (msg) => {
   axios.get('https://fmg-quiz-bot.onrender.com/')
     .then(response => {
       console.log("Successfully hit the endpoint:", response.data);
-      bot.sendMessage(msg.chat.id, "Welcome message sent successfully! Type /help for more information.");
+      bot.sendMessage(msg.chat.id, "Welcome! 🎉 The bot is up and running. Type /help to explore available commands and get started.");
     })
     .catch(error => {
       console.error("Error hitting the endpoint:", error.message);
