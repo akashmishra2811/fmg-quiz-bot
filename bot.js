@@ -4,6 +4,7 @@ const { handleQuiz, handleCallbackQuery } = require('./src/pages/quiz');
 const { processFile } = require('./src/pages/processFile');
 const {quizScheduler, handleScheduledCallbackQuery} = require('./src/pages/quizScheduler');
 const express = require('express');
+const axios = require('axios');
 const bot = new TelegramBot(TOKEN, { polling: true });
 
 const app = express();
@@ -17,7 +18,17 @@ app.listen(PORT, () => {
   console.log(`Express server is running on port ${PORT}`);
 });
 bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(msg.chat.id, "Welcome to the Quiz Bot! Type /quiz to start.");
+  
+  bot.sendMessage(msg.chat.id, "Bot is starting... Please wait.⏳");
+  axios.get('https://fmg-quiz-bot.onrender.com/')
+    .then(response => {
+      console.log("Successfully hit the endpoint:", response.data);
+      bot.sendMessage(msg.chat.id, "Welcome message sent successfully! Type /help for more information.");
+    })
+    .catch(error => {
+      console.error("Error hitting the endpoint:", error.message);
+      bot.sendMessage(msg.chat.id, "There was an error starting the bot. Please try again later.");
+    });
 });
 
 bot.onText(/\/test/, (msg) => {
