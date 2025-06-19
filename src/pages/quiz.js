@@ -24,7 +24,7 @@ async function handleQuiz(bot, msg) {
     const loadingMessage = await bot.sendMessage(chatId, "⏳ Preparing your Test... Please wait.");
 
     const today = new Date().toISOString().split("T")[0];
-    const url = "https://script.google.com/macros/s/AKfycbwjQwM32aR0BDbF502K7CKSKc5Sfn2UfiLOKgEzqsPWs4fLjI9oo-f9HywNgCoFsCMq/exec";
+    const url = "https://script.google.com/macros/s/AKfycbw21RONRkprPjzw3-q1JKvQoCOeLAH0CLGkAD8DgVyBFKrmjRr7RKaQaQISuCvFu5e7/exec";
     const payload = {
       title: `fmg-quiz (${today})`,
       questions: quiz,
